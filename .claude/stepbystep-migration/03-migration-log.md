@@ -135,3 +135,28 @@ Status: **complete.**
 - Committed as a single commit for this hop.
 
 Status: **complete.**
+
+## Hop 16 → 17
+
+- Commands run:
+  - `npm install --legacy-peer-deps --save-dev @angular/cli@17 @angular-devkit/build-angular@17 @angular/compiler-cli@17`
+  - `npm install --legacy-peer-deps @angular/core@17 @angular/common@17 @angular/compiler@17 @angular/forms@17 @angular/platform-browser@17 @angular/platform-browser-dynamic@17 @angular/router@17 @angular/animations@17`
+  - `./node_modules/.bin/ng update @angular/core --migrate-only --from=16 --to=17 --allow-dirty`
+- Migration schematics run (all "no changes made" — no matching patterns):
+  new `@if/@for/@switch` control-flow syntax migration, `TransferState`
+  import-path migration, unused `useJit`/`missingTranslation` compiler
+  option removal, two-way binding longform migration.
+- **Required manual fix:** Angular 17's compiler requires
+  `TypeScript >=5.2.0 <5.5.0`; the project was still on `4.6.4`. Bumped
+  `typescript` to `~5.4.5` (`npm install --legacy-peer-deps --save-dev
+  typescript@~5.4.5`) — no new type errors surfaced under the stricter
+  compiler, `strict`/`strictTemplates` settings already in place from v13.
+- Build: **PASSES.** Tests: **14 failed / 10 passed**, exact baseline, no
+  regressions.
+- Did **not** run the optional `@if/@for` control-flow schematic or switch
+  to the new `application` builder yet — both are opportunistic per the
+  plan, deferred to the final cleanup pass (hop 21→22) so each hop stays
+  focused on the version bump itself.
+- Committed as a single commit for this hop.
+
+Status: **complete.**
