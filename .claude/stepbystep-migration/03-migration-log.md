@@ -224,3 +224,27 @@ Status: **complete.**
 - Committed as a single commit for this hop.
 
 Status: **complete.**
+
+## Hop 19 → 20
+
+- Commands run:
+  - `npm install --legacy-peer-deps --save-dev @angular/cli@20 @angular-devkit/build-angular@20 @angular/compiler-cli@20`
+  - `npm install --legacy-peer-deps @angular/core@20 @angular/common@20 @angular/compiler@20 @angular/forms@20 @angular/platform-browser@20 @angular/platform-browser-dynamic@20 @angular/router@20 @angular/animations@20`
+  - `./node_modules/.bin/ng update @angular/core --migrate-only --from=19 --to=20 --allow-dirty`
+- Migration schematics run (all "no changes made" — no matching patterns):
+  `DOCUMENT` import-path move (`@angular/common` → `@angular/core`),
+  deprecated `InjectFlags` enum replacement, deprecated `TestBed.get` →
+  `TestBed.inject` replacement, `BootstrapContext` for `main.server.ts`.
+- Left the two **optional** migrations un-run (control-flow block-syntax
+  conversion, `Router.getCurrentNavigation` → `Router.currentNavigation`
+  signal) — both are opportunistic per the plan, deferred to the final
+  cleanup pass.
+- TypeScript already at `~5.8.3`, within Angular 20's required range — no
+  bump needed.
+- Build (`ng build --configuration production`): **PASSES.** Bundle sizes
+  essentially unchanged (main 955.94 kB vs 947.91 kB at v19).
+- Tests (`ng test --watch=false --browsers=ChromeHeadless`): **14 failed /
+  10 passed** — exact baseline, no new failures.
+- Committed as a single commit for this hop.
+
+Status: **complete.**
