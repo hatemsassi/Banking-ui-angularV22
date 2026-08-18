@@ -7,9 +7,10 @@ export interface LightInfoInput {
 }
 
 @Component({
-  selector: 'app-light-info',
-  templateUrl: './light-info.component.html',
-  styleUrls: ['./light-info.component.scss']
+    selector: 'app-light-info',
+    templateUrl: './light-info.component.html',
+    styleUrls: ['./light-info.component.scss'],
+    standalone: false
 })
 export class LightInfoComponent implements OnInit {
 

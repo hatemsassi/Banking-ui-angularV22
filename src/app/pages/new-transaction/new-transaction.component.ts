@@ -8,9 +8,10 @@ import { TransactionDto } from '../../services/models/transaction-dto';
 import { ContactDto } from '../../services/models/contact-dto';
 
 @Component({
-  selector: 'app-new-transaction',
-  templateUrl: './new-transaction.component.html',
-  styleUrls: ['./new-transaction.component.scss']
+    selector: 'app-new-transaction',
+    templateUrl: './new-transaction.component.html',
+    styleUrls: ['./new-transaction.component.scss'],
+    standalone: false
 })
 export class NewTransactionComponent implements OnInit {
 

@@ -1,9 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 
 @Component({
-  selector: 'app-access-deined',
-  templateUrl: './access-deined.component.html',
-  styleUrls: ['./access-deined.component.scss']
+    selector: 'app-access-deined',
+    templateUrl: './access-deined.component.html',
+    styleUrls: ['./access-deined.component.scss'],
+    standalone: false
 })
 export class AccessDeinedComponent implements OnInit {
 

@@ -187,3 +187,40 @@ Status: **complete.**
 - Committed as a single commit for this hop.
 
 Status: **complete.**
+
+## Hop 18 → 19
+
+- Commands run:
+  - `npm install --legacy-peer-deps --save-dev @angular/cli@19 @angular-devkit/build-angular@19 @angular/compiler-cli@19`
+  - `npm install --legacy-peer-deps @angular/core@19 @angular/common@19 @angular/compiler@19 @angular/forms@19 @angular/platform-browser@19 @angular/platform-browser-dynamic@19 @angular/router@19 @angular/animations@19`
+  - `./node_modules/.bin/ng update @angular/core --migrate-only --from=18 --to=19 --allow-dirty`
+- Migration schematics run:
+  - **Standalone-flag migration — made real changes across 17 files:** added
+    explicit `standalone: false` to every `@Component`/`@Directive`/`@Pipe`
+    in the codebase (`login`, `register`, `light-info`, `user-dashboard`,
+    `my-transactions`, `main-page`, `my-contact-list`, `new-transaction`,
+    `new-contact`, `profile`, `main-admin-page`, `manage-users`,
+    `admin-dashboard`, `confirm-register`, `access-deined`, `app.component`,
+    `menu`). This is expected and purely mechanical: Angular 19 flips the
+    *default* for the `standalone` flag to `true`, so the schematic makes the
+    existing NgModule-declared classes explicit about opting out, with no
+    behavior change.
+  - `ExperimentalPendingTasks` → `PendingTasks` rename, and
+    `BootstrapContext` for `main.server.ts`: no changes made (not applicable
+    — no SSR entry point in this app).
+  - Left the **optional** `APP_INITIALIZER`/`ENVIRONMENT_INITIALIZER` →
+    `provideAppInitializer`/`provideEnvironmentInitializer` migration
+    un-run — none of those tokens are used in this codebase, so it would be
+    a no-op; noted here for completeness.
+- **Required manual fix:** Angular 19's compiler requires
+  `TypeScript >=5.5.0 <5.9.0`; bumped from `5.4.5` to `~5.8.3`
+  (`npm install --legacy-peer-deps --save-dev typescript@~5.8.3`) — no new
+  type errors.
+- Build (`ng build --configuration production`): **PASSES.** Bundle sizes
+  essentially unchanged (main 947.91 kB vs 932.47 kB at v17 — small growth
+  from newer Angular runtime code, still well within budget).
+- Tests (`ng test --watch=false --browsers=ChromeHeadless`): **14 failed /
+  10 passed** — exact baseline, no new failures.
+- Committed as a single commit for this hop.
+
+Status: **complete.**

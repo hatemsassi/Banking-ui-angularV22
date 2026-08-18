@@ -9,9 +9,10 @@ import { DatepickerOptions } from 'ng2-datepicker';
 import { DatePipe } from '@angular/common';
 
 @Component({
-  selector: 'app-user-dashboard',
-  templateUrl: './user-dashboard.component.html',
-  styleUrls: ['./user-dashboard.component.scss']
+    selector: 'app-user-dashboard',
+    templateUrl: './user-dashboard.component.html',
+    styleUrls: ['./user-dashboard.component.scss'],
+    standalone: false
 })
 export class UserDashboardComponent implements OnInit {
 

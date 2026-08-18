@@ -5,9 +5,10 @@ import { HelperService } from '../../services/helper/helper.service';
 import { ActivatedRoute, Router } from '@angular/router';
 
 @Component({
-  selector: 'app-new-contact',
-  templateUrl: './new-contact.component.html',
-  styleUrls: ['./new-contact.component.scss']
+    selector: 'app-new-contact',
+    templateUrl: './new-contact.component.html',
+    styleUrls: ['./new-contact.component.scss'],
+    standalone: false
 })
 export class NewContactComponent implements OnInit {
 
