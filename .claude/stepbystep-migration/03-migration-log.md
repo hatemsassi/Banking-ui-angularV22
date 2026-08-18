@@ -248,3 +248,60 @@ Status: **complete.**
 - Committed as a single commit for this hop.
 
 Status: **complete.**
+
+## Hop 20 → 21
+
+- Commands run:
+  - `npm install --legacy-peer-deps --save-dev @angular/cli@21 @angular-devkit/build-angular@21 @angular/compiler-cli@21`
+  - `npm install --legacy-peer-deps @angular/core@21 @angular/common@21 @angular/compiler@21 @angular/forms@21 @angular/platform-browser@21 @angular/platform-browser-dynamic@21 @angular/router@21 @angular/animations@21`
+  - `./node_modules/.bin/ng update @angular/core --migrate-only --from=20 --to=21 --allow-dirty`
+- Migration schematics run — **two made real changes:**
+  - **Bootstrap-options migration** (`src/main.ts`): the deprecated
+    zone-related bootstrap flag was rewritten as
+    `platformBrowserDynamic().bootstrapModule(AppModule, {
+    applicationProviders: [provideZoneChangeDetection()] })`, importing
+    `provideZoneChangeDetection` from `@angular/core`. Zone.js-based change
+    detection is kept (no zoneless adoption — out of scope per the original
+    prompt unless explicitly requested).
+  - **Control-flow syntax migration — no longer optional in this Angular
+    version, made changes across 10 template files:** `*ngIf`/`*ngFor`
+    rewritten to `@if`/`@for` block syntax (with `track` expressions added
+    to every `@for`) in `menu`, `manage-users`, `profile`, `new-contact`,
+    `new-transaction`, `my-contact-list`, `my-transactions`,
+    `user-dashboard`, `register`, `login`. Spot-checked `login.component.html`
+    — migration is structurally correct (nesting preserved, `track msg`
+    added to the loop over `errorMessages`).
+  - `ApplicationConfig` import-path move, `BootstrapContext` for
+    `main.server.ts`, `Router.lastSuccessfulNavigation` signal invocation:
+    no changes made (not applicable to this codebase).
+  - Left the **optional** `Router.getCurrentNavigation` →
+    `Router.currentNavigation` signal migration un-run (opportunistic,
+    deferred).
+- **Required manual fix #1:** Angular 21's compiler requires
+  `TypeScript >=5.9.0 <6.1.0`; bumped from `5.8.3` to `~5.9.0`.
+- **Required manual fix #2 (real, non-schematic bug):** after the
+  TypeScript bump, the build failed with `TS2307: Cannot find module
+  '@angular/common/http'` across every service that injects `HttpClient`.
+  Root cause: `@angular/common@21` only exposes its `./http` subpath via
+  the modern package.json `"exports"` map (`./fesm2022/http.mjs` +
+  `./types/http.d.ts`) — there's no longer a legacy `http/package.json`
+  shim directory for it. This project's `tsconfig.json` still had
+  `"moduleResolution": "node"` (the old handwritten-in-v13 classic
+  resolution mode), which does not read the `"exports"` map at all, so it
+  couldn't find the subpath even though the files physically exist.
+  Fixed by changing `tsconfig.json`'s `"moduleResolution"` from `"node"` to
+  `"bundler"` (Angular's current recommendation, compatible with the
+  existing `"module": "es2020"` and the still-webpack-based dev/karma
+  builders used at this hop). This is a real, permanent fix, not a
+  version-specific workaround — `moduleResolution: "node"` is deprecated
+  and this codebase should not have still been on it going into v21.
+- Build (`ng build --configuration production`): **PASSES** after both
+  manual fixes. Bundle sizes essentially unchanged (main 958.38 kB vs
+  955.94 kB at v20).
+- Tests (`ng test --watch=false --browsers=ChromeHeadless`): **14 failed /
+  10 passed** — exact baseline, no new failures.
+- Committed as a single commit for this hop (package bump + schematic
+  output + the two manual fixes together, since they're required to make
+  the hop build/test-clean).
+
+Status: **complete.**

@@ -8,26 +8,28 @@
   <div>
     <table class="table table-bordered">
       <thead>
-      <tr>
-        <th scope="col">Firstname</th>
-        <th scope="col">Lastname</th>
-        <th scope="col">Email</th>
-        <th scope="col">IBAN</th>
-        <th scope="col">Actions</th>
-      </tr>
+        <tr>
+          <th scope="col">Firstname</th>
+          <th scope="col">Lastname</th>
+          <th scope="col">Email</th>
+          <th scope="col">IBAN</th>
+          <th scope="col">Actions</th>
+        </tr>
       </thead>
       <tbody>
-      <tr *ngFor="let ct of contacts">
-        <th>{{ct.firstname}}</th>
-        <td>{{ct.lastname}}</td>
-        <td>{{ct.email}}</td>
-        <td>{{ct.iban}}</td>
-        <td class="cursor-pointer">
-          <em (click)="update(ct.id)" class="fas fa-edit text-primary"></em>
-          &nbsp;|&nbsp;
-          <em (click)="userIdToDelete = ct.id" class="fas fa-trash text-danger" data-bs-toggle="modal" data-bs-target="#staticBackdrop"></em>
-        </td>
-      </tr>
+        @for (ct of contacts; track ct) {
+          <tr>
+            <th>{{ct.firstname}}</th>
+            <td>{{ct.lastname}}</td>
+            <td>{{ct.email}}</td>
+            <td>{{ct.iban}}</td>
+            <td class="cursor-pointer">
+              <em (click)="update(ct.id)" class="fas fa-edit text-primary"></em>
+              &nbsp;|&nbsp;
+              <em (click)="userIdToDelete = ct.id" class="fas fa-trash text-danger" data-bs-toggle="modal" data-bs-target="#staticBackdrop"></em>
+            </td>
+          </tr>
+        }
       </tbody>
     </table>
   </div>

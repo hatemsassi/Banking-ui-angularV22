@@ -8,31 +8,33 @@
   <div>
     <table class="table table-bordered">
       <thead>
-      <tr>
-        <th scope="col">Date</th>
-        <th scope="col">Amount</th>
-        <th scope="col">IBAN</th>
-        <th scope="col">Type</th>
-      </tr>
+        <tr>
+          <th scope="col">Date</th>
+          <th scope="col">Amount</th>
+          <th scope="col">IBAN</th>
+          <th scope="col">Type</th>
+        </tr>
       </thead>
       <tbody>
-      <tr *ngFor="let trs of transactions">
-        <th scope="row">{{trs.transactionDate}}</th>
-        <td>
-          <span
-            [class.text-danger]="trs.type === 'TRANSFERT'"
-            [class.text-success]="trs.type === 'DEPOSIT'"
-          >{{trs.amount}}</span>
-        </td>
-        <td>{{trs.destinationIban}}</td>
-        <td>
-          <span
-            class="badge"
-            [class.bg-warning]="trs.type === 'TRANSFERT'"
-            [class.bg-success]="trs.type === 'DEPOSIT'"
-          >{{trs.type}}</span>
-        </td>
-      </tr>
+        @for (trs of transactions; track trs) {
+          <tr>
+            <th scope="row">{{trs.transactionDate}}</th>
+            <td>
+              <span
+                [class.text-danger]="trs.type === 'TRANSFERT'"
+                [class.text-success]="trs.type === 'DEPOSIT'"
+              >{{trs.amount}}</span>
+            </td>
+            <td>{{trs.destinationIban}}</td>
+            <td>
+              <span
+                class="badge"
+                [class.bg-warning]="trs.type === 'TRANSFERT'"
+                [class.bg-success]="trs.type === 'DEPOSIT'"
+              >{{trs.type}}</span>
+            </td>
+          </tr>
+        }
       </tbody>
     </table>
   </div>
