@@ -387,3 +387,104 @@ Status: **complete.**
   output + manual TS/lib fixes + application-builder migration together).
 
 Status: **complete. This is the final hop — the app is now on Angular 22.**
+
+## Final migration report
+
+**Versions traversed:** Angular 13.3.0 → 14.3.0 → 15.2.10 → 16.2.12 →
+17.3.12 → 18.2.14 → 19.2.25 → 20.x → 21.x → 22.1.2, one major version at a
+time, `ng update` + schematics at every hop, one commit per hop
+(`6aba773` … `3fb9bda`). TypeScript went 4.6.2 → 4.9.5 → 5.4.5 → 5.8.3 →
+5.9.0 → 6.0.2 alongside it. Build tooling moved from the legacy
+webpack-based `@angular-devkit/build-angular:*` builders to the new
+esbuild/Vite `@angular/build:*` `application` builder in the final hop.
+
+**Packages replaced/removed:** none. `ng2-charts@2.4.3` + `chart.js@2.9.4`
+and `ng2-datepicker@12.0.0` — all three flagged **High risk** in the
+initial audit (`01-audit.md`) as likely needing a lockstep upgrade or
+replacement — turned out to keep building and running correctly at every
+hop all the way to Angular 22, so none were touched, per the plan's "pause
+and ask before replacing" rule (nothing was ever actually broken enough to
+need it). They remain on old majors (chart.js v2 API, an unmaintained-since-
+Angular-12 datepicker) and are flagged below as follow-up, not migration
+blockers.
+
+**Manual interventions required (beyond `ng update`'s own schematics):**
+- Hop 15→16: none beyond the schematic's own `CanActivate` deprecation fix.
+- Hop 16→17: TypeScript bump to `~5.4.5` (compiler range requirement).
+- Hop 17→18: none beyond the schematic's own `HttpClientModule` →
+  `provideHttpClient()` migration (shipped one version earlier than the
+  original plan anticipated).
+- Hop 18→19: TypeScript bump to `~5.8.3`.
+- Hop 19→20: none.
+- Hop 20→21: TypeScript bump to `~5.9.0`; also fixed a real `TS2307`
+  module-resolution failure by switching `tsconfig.json`'s
+  `moduleResolution` from the deprecated `"node"` mode to `"bundler"`,
+  since `@angular/common@21`'s `./http` subpath became exports-map-only.
+  (The unrelated `src/test.ts`/`require.context` schematic loose ends were
+  a hop 14→15 issue, fixed at that hop — see that section above.)
+- Hop 21→22: TypeScript bump to `6.0.2`; worked around a genuine upstream
+  TypeScript 6.0.x bug (`lib.esnext.intl.d.ts` missing a reference to
+  `lib.es2021.intl.d.ts`) by adding `"es2021.intl"` to `tsconfig.json`'s
+  `lib` array; removed deprecated `baseUrl`/`downlevelIteration` compiler
+  options; ran the `use-application-builder` schematic to complete the
+  plan's step 4.
+
+**Remaining deprecations/TODOs (deliberately deferred, not blocking):**
+- `ng2-charts@2.4.3` / `chart.js@2.9.4` — still on the old chart.js v2 API.
+  Works today; upgrading to `ng2-charts` v6+/`chart.js` v4 would require
+  rewriting `user-dashboard.component.ts`'s chart config (breaking API
+  changes) and is a good candidate for a focused follow-up task.
+- `ng2-datepicker@12.0.0` — unmaintained since the Angular 12 era but still
+  builds/runs. Worth planning a replacement (native `<input type="date">`
+  or a maintained picker) before it does break on some future Angular
+  version, but not urgent today.
+- Optional/opportunistic schematics never run, since none were needed for
+  correctness: `Router.getCurrentNavigation` → `Router.currentNavigation`
+  signal migration; `migrate-karma-to-vitest` (test framework switch —
+  out of scope, wasn't requested); guard classes (`admin-guard.service.ts`,
+  `token-guard.service.ts`) still use class-based `CanActivate` rather than
+  functional `CanActivateFn` (supported but deprecated-style); the
+  class-based `HttpInterceptorService` (`HTTP_INTERCEPTORS` token) was kept
+  rather than converted to a functional interceptor.
+- Zoneless change detection was **not** adopted — zone.js is still in use,
+  per the original prompt's instruction to keep it unless explicitly
+  requested.
+- `npm audit` reports vulnerabilities in transitive dependencies throughout
+  (mostly via old `chart.js`/`ng2-datepicker`/build-tool sub-dependencies).
+  Not addressed here — `npm audit fix --force` would pull in breaking
+  changes and should be a deliberate, separate task.
+- Duplicated Bootstrap JS bundles in `angular.json`'s `scripts` array
+  (`bootstrap.min.js` **and** `bootstrap.bundle.min.js`, both loading
+  Popper) — noted in the original audit as a pre-existing redundancy, not
+  touched since it's unrelated to the Angular version migration itself.
+- `angular.json` has a `"Workspace extension with invalid name
+  (defaultProject) found"` warning on every CLI invocation throughout the
+  entire migration — pre-existing from the v13 workspace file, harmless,
+  not addressed since it's cosmetic and outside migration scope.
+
+**Verification checklist:**
+- [x] `ng build --configuration production` passes on Angular 22 with the
+      new `application` builder (main chunk 667.20 kB raw / 172.03 kB
+      transfer — smaller than the v13 baseline).
+- [x] `ng test --watch=false --browsers=ChromeHeadless` passes with the
+      exact same result as the pre-migration v13 baseline at every single
+      hop: **14 failed / 10 passed**, same 14 test names throughout — these
+      14 failures **pre-date the migration** (missing `RouterTestingModule`/
+      `HttpClientTestingModule` providers in existing spec files) and were
+      never introduced or hidden by this work.
+- [ ] App manually smoke-tested end-to-end in a browser (login, dashboard,
+      contacts, transactions, admin pages) — **not done in this session**;
+      recommended before merging/deploying, since automated coverage here
+      is thin (only 24 specs, mostly just "should create").
+- [x] All 9 version hops traceable to individual commits on
+      `angular-upgrade-v21`, each buildable/testable in isolation.
+
+**Note on this session:** a second, independent Claude Code session was
+found actively running this same migration concurrently on this same
+branch for part of this work (hops 13→14 through 16→17 were completed and
+committed by that other session; this session picked up from 17→18 onward
+after confirming the other session had stopped). Both sessions converged
+on identical fixes at every point of overlap, and the full commit history
+was verified for consistency end-to-end — but running two agents against
+the same working tree at once was a genuine risk (corrupted installs,
+conflicting commits) that happened not to cause damage here.
