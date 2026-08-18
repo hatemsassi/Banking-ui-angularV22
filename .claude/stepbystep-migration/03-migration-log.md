@@ -62,3 +62,46 @@
 - Committed as a single commit for this hop.
 
 Status: **complete.**
+
+## Hop 14 → 15
+
+- Commands run:
+  - `npm install --legacy-peer-deps --save-dev @angular/cli@15 @angular-devkit/build-angular@15 @angular/compiler-cli@15`
+  - `npm install --legacy-peer-deps @angular/core@15 @angular/common@15 @angular/compiler@15 @angular/forms@15 @angular/platform-browser@15 @angular/platform-browser-dynamic@15 @angular/router@15 @angular/animations@15`
+  - `./node_modules/.bin/ng update @angular/core --migrate-only --from=14 --to=15 --allow-dirty`
+- Migration schematics run (all reported "no changes made" — no matching
+  patterns in this codebase):
+  - `relativeLinkResolution` Router config removal migration
+  - `RouterLinkWithHref` → `RouterLink` migration
+- **A separate schematic run as part of the `@angular/cli` package update
+  did make real changes**, and caused a genuine (now-fixed) regression:
+  - Removed the `"main": "src/test.ts"` option from the `test` target in
+    `angular.json`, and deleted `src/test.ts` — this is Angular's own move
+    toward the karma builder auto-discovering spec files instead of a
+    hand-written `require.context` entry point.
+  - This left two loose ends that the schematic did not finish cleaning up,
+    which broke `ng test` (`__webpack_require__(...).context is not a
+    function`, then `zone-testing.js is needed... could not be found`):
+    1. `tsconfig.spec.json` still listed the now-deleted `src/test.ts` in
+       its `"files"` array — removed it.
+    2. Nothing loaded `zone.js/testing` anymore (it was previously imported
+       inside the deleted `test.ts`) — fixed by adding `"zone.js/testing"`
+       to the `test` target's `polyfills` array in `angular.json` (kept
+       separate from the app's `src/polyfills.ts`, which is also used by
+       the production build, so test-only zone patching doesn't ship to
+       prod).
+  - Manual fixes: edited `tsconfig.spec.json` and `angular.json` (see diff
+    in the commit for this hop).
+- Also hit one transient, non-reproducible build error on the first build
+  attempt (`Cannot find package '...\typescript\index.js'`, immediately
+  after ngcc processing) — a retry succeeded with no changes; treated as a
+  one-off ngcc/lockfile race, not a real regression.
+- Build (`ng build --configuration production`): **PASSES** after the
+  manual fixes above. Bundle sizes essentially unchanged.
+- Tests (`ng test --watch=false --browsers=ChromeHeadless`): **14 failed /
+  10 passed** — back to the exact v13 baseline, no new failures.
+- Committed as a single commit for this hop (package bump + the two manual
+  test-config fixes together, since the fixes are required to make the hop
+  build/test-clean).
+
+Status: **complete.**
