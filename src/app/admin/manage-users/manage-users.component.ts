@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { UserService } from '../../services/services/user.service';
 import { UserDto } from '../../services/models/user-dto';
 
@@ -6,6 +6,7 @@ import { UserDto } from '../../services/models/user-dto';
     selector: 'app-manage-users',
     templateUrl: './manage-users.component.html',
     styleUrls: ['./manage-users.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class ManageUsersComponent implements OnInit {

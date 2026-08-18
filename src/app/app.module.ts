@@ -18,7 +18,7 @@ import { MainPageComponent } from './pages/main-page/main-page.component';
 import { MainAdminPageComponent } from './admin/main-admin-page/main-admin-page.component';
 import { AdminDashboardComponent } from './admin/admin-dashboard/admin-dashboard.component';
 import { FirstService } from './services/first-service/first.service';
-import { HTTP_INTERCEPTORS, HttpClient, provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { HTTP_INTERCEPTORS, HttpClient, provideHttpClient, withInterceptorsFromDi, withXhr } from '@angular/common/http';
 import { HttpInterceptorService } from './services/http-interceptor/http-interceptor.service';
 import { FormsModule } from '@angular/forms';
 import { ConfirmRegisterComponent } from './pages/confirm-register/confirm-register.component';
@@ -58,7 +58,7 @@ import { DatePipe } from '@angular/common';
         },
         HttpClient,
         DatePipe,
-        provideHttpClient(withInterceptorsFromDi())
+        provideHttpClient(withXhr(), withInterceptorsFromDi())
     ] })
 export class AppModule {
 }

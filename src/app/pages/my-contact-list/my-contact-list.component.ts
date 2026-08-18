@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { ContactService } from '../../services/services/contact.service';
 import { ContactDto } from '../../services/models/contact-dto';
 import { HelperService } from '../../services/helper/helper.service';
@@ -8,6 +8,7 @@ import { Router } from '@angular/router';
     selector: 'app-my-contact-list',
     templateUrl: './my-contact-list.component.html',
     styleUrls: ['./my-contact-list.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class MyContactListComponent implements OnInit {

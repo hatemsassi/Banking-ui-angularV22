@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { Router } from '@angular/router';
 import { UserDto } from '../../services/models/user-dto';
 import { AuthenticationService } from '../../services/services/authentication.service';
@@ -7,6 +7,7 @@ import { AuthenticationService } from '../../services/services/authentication.se
     selector: 'app-register',
     templateUrl: './register.component.html',
     styleUrls: ['./register.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class RegisterComponent implements OnInit {

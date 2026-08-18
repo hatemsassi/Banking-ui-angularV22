@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { LightInfoInput } from '../../components/light-info/light-info.component';
 import { StatisticsService } from '../../services/services/statistics.service';
 import { HelperService } from '../../services/helper/helper.service';
@@ -12,6 +12,7 @@ import { DatePipe } from '@angular/common';
     selector: 'app-user-dashboard',
     templateUrl: './user-dashboard.component.html',
     styleUrls: ['./user-dashboard.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
 export class UserDashboardComponent implements OnInit {

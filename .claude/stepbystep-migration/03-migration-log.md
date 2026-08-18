@@ -305,3 +305,85 @@ Status: **complete.**
   the hop build/test-clean).
 
 Status: **complete.**
+
+## Hop 21 → 22
+
+- Commands run:
+  - `npm install --legacy-peer-deps --save-dev @angular/cli@22 @angular-devkit/build-angular@22 @angular/compiler-cli@22`
+  - `npm install --legacy-peer-deps @angular/core@22 @angular/common@22 @angular/compiler@22 @angular/forms@22 @angular/platform-browser@22 @angular/platform-browser-dynamic@22 @angular/router@22 @angular/animations@22`
+  - `./node_modules/.bin/ng update @angular/core --migrate-only --from=21 --to=22 --allow-dirty`
+- Migration schematics run — **three made real changes:**
+  - **`ChangeDetectionStrategy.Eager` added to all 17 components** — Angular
+    22 changes the *default* change-detection strategy; this schematic
+    makes every existing component explicit about keeping the old default,
+    so behavior is unchanged.
+  - **`withXhr()` added to the `provideHttpClient()` call in
+    `app.module.ts`** — Angular 22 changed `provideHttpClient()`'s default
+    backend; this keeps the pre-v22 XHR-based backend instead of switching
+    to `fetch`, again for behavior preservation.
+  - **Extended-diagnostics suppression added to `tsconfig.app.json` and
+    `tsconfig.spec.json`** (`nullishCoalescingNotNullable` and
+    `optionalChainNotNullable` set to `"suppress"`) — keeps pre-v22
+    template-checking leniency around `??`/`?.` so existing templates don't
+    start erroring under stricter diagnostics.
+  - `canMatch` third-argument addition, incremental-hydration opt-out,
+    duplicate-outputs fix, safe-navigation wrapping: no changes made (not
+    applicable to this codebase).
+- **Required manual fix #1:** Angular 22's compiler requires
+  `TypeScript >=6.0.0 <6.1.0`; bumped from `5.9.0` to `6.0.2` (tried `6.0.3`
+  first — see bug below).
+- **Required manual fix #2 (real upstream TypeScript bug, not an Angular
+  issue):** with TypeScript 6.0.2 *and* 6.0.3, the build failed with
+  `TS2552: Cannot find name 'DateTimeRangeFormatPart'` inside TypeScript's
+  own bundled `lib/lib.esnext.intl.d.ts`. Root cause: that lib file uses
+  the `DateTimeRangeFormatPart` type, which is actually defined in a
+  different bundled lib file (`lib.es2021.intl.d.ts`), and
+  `lib.esnext.intl.d.ts` doesn't reference/pull it in — a genuine defect in
+  TypeScript's shipped type-declaration files for the entire 6.0.x line
+  (confirmed present in both 6.0.2 and 6.0.3, the only two stable 6.0.x
+  releases available). `lib.esnext.intl.d.ts` was being loaded transitively
+  via `"dom"` in this project's `tsconfig.json` `"lib"` array, even though
+  neither `"esnext"` nor `"esnext.intl"` was listed explicitly. Worked
+  around by adding `"es2021.intl"` explicitly to `tsconfig.json`'s `"lib"`
+  array, which makes the missing type available regardless of load order.
+  This is a workaround for an upstream TS bug, not a design choice — worth
+  removing if a later TypeScript 6.0.x patch fixes it upstream.
+- **Also removed the now-unnecessary deprecated compiler options**
+  `baseUrl` (unused — no `"paths"` mapping in this project) and
+  `downlevelIteration` (unnecessary at `target: "es2017"`+, which already
+  has native iteration support) from `tsconfig.json`, since TypeScript 6.0
+  makes both hard-error unless suppressed with `ignoreDeprecations`, and
+  removing them outright is cleaner than suppressing.
+- Build (`ng build --configuration production`): **PASSES** after all
+  fixes above, still on the legacy webpack-based `browser` builder at this
+  point. Bundle sizes essentially unchanged from v21.
+- Tests (`ng test --watch=false --browsers=ChromeHeadless`): **14 failed /
+  10 passed** — exact baseline, no new failures (verified the failing test
+  *names* match the same known set, not just the count).
+- **Final-pass step (per the original migration prompt's step 4):**
+  switched the build to the new esbuild/Vite `application` builder via
+  `./node_modules/.bin/ng update @angular/cli --name use-application-builder --allow-dirty`.
+  This rewrote `angular.json` (`build`/`serve`/`extract-i18n`/`test`
+  targets now use `@angular/build:*` builders instead of
+  `@angular-devkit/build-angular:*`), removed the now-obsolete
+  `@angular-devkit/build-angular/plugins/karma` require from
+  `karma.conf.js`, replaced the `@angular-devkit/build-angular` devDep with
+  `@angular/build`, and added `esModuleInterop: true` to `tsconfig.json`.
+  Output path changed from `dist/banking-ui` to `dist/banking-ui/browser`
+  (new builder convention) — flagged here in case any deployment
+  script/CI step referenced the old flat output path.
+  - Rebuilt and retested on the new builder: **build passes** (bundle size
+    dropped noticeably — main chunk 667.20 kB vs 982.28 kB raw on the old
+    webpack builder, thanks to esbuild's tree-shaking/minification being
+    more aggressive), **tests: 14 failed / 10 passed**, same exact baseline.
+  - Did **not** run the optional `migrate-karma-to-vitest` schematic —
+    switching test frameworks wasn't asked for and is out of scope; Karma +
+    Jasmine still works fine on the new builder.
+  - Did **not** run the two other optional/opportunistic schematics deferred
+    from earlier hops (`Router.getCurrentNavigation` →
+    `Router.currentNavigation` signal) — no behavior need, left for a future
+    cleanup pass if desired.
+- Committed as a single commit for this hop (package bump + schematic
+  output + manual TS/lib fixes + application-builder migration together).
+
+Status: **complete. This is the final hop — the app is now on Angular 22.**
