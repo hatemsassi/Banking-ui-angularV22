@@ -105,3 +105,33 @@ Status: **complete.**
   build/test-clean).
 
 Status: **complete.**
+
+## Hop 15 → 16
+
+- Checked `ng2-datepicker`/`ng2-charts` compatibility before starting (per
+  the upgrade plan's flag on this hop): `ng2-datepicker@12.0.0` (latest,
+  already installed) declares a loose `@angular/core >= 11.0.0` peer, so it
+  keeps installing; it built and ran without any errors on v16, so **no
+  replacement needed yet** — deferring further per the "pause and ask
+  before replacing" rule, since nothing is actually broken. Re-check at
+  each future hop.
+- Commands run:
+  - `npm install --legacy-peer-deps --save-dev @angular/cli@16 @angular-devkit/build-angular@16 @angular/compiler-cli@16`
+  - `npm install --legacy-peer-deps @angular/core@16 @angular/common@16 @angular/compiler@16 @angular/forms@16 @angular/platform-browser@16 @angular/platform-browser-dynamic@16 @angular/router@16 @angular/animations@16`
+  - `./node_modules/.bin/ng update @angular/core --migrate-only --from=15 --to=16 --allow-dirty`
+- Migration schematics run:
+  - **`CanActivate` interface deprecation migration — made real changes:**
+    removed the deprecated `implements CanActivate` clause and its now-
+    unused import from `admin-guard.service.ts` and `token-guard.service.ts`.
+    The classes still expose the same `canActivate()` method the Router
+    uses structurally, so this is a no-op functionally, just removes a
+    deprecated type annotation.
+  - `moduleId` deprecation migration: no changes made (not used here).
+- Build (`ng build --configuration production`): **PASSES.** `ng2-charts`
+  and `ng2-datepicker` are no longer flagged as legacy View Engine libraries
+  needing ngcc processing at this version — good sign for their continued
+  viability, though still worth re-checking each hop.
+- Tests: **14 failed / 10 passed** — exactly the baseline, no regressions.
+- Committed as a single commit for this hop.
+
+Status: **complete.**
