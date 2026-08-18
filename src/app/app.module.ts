@@ -18,7 +18,7 @@ import { MainPageComponent } from './pages/main-page/main-page.component';
 import { MainAdminPageComponent } from './admin/main-admin-page/main-admin-page.component';
 import { AdminDashboardComponent } from './admin/admin-dashboard/admin-dashboard.component';
 import { FirstService } from './services/first-service/first.service';
-import { HTTP_INTERCEPTORS, HttpClient, HttpClientModule } from '@angular/common/http';
+import { HTTP_INTERCEPTORS, HttpClient, provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { HttpInterceptorService } from './services/http-interceptor/http-interceptor.service';
 import { FormsModule } from '@angular/forms';
 import { ConfirmRegisterComponent } from './pages/confirm-register/confirm-register.component';
@@ -27,44 +27,38 @@ import { ChartsModule } from 'ng2-charts';
 import { DatepickerModule } from 'ng2-datepicker';
 import { DatePipe } from '@angular/common';
 
-@NgModule({
-  declarations: [
-    AppComponent,
-    LoginComponent,
-    RegisterComponent,
-    MenuComponent,
-    UserDashboardComponent,
-    LightInfoComponent,
-    MyTransactionsComponent,
-    MyContactListComponent,
-    NewTransactionComponent,
-    NewContactComponent,
-    ProfileComponent,
-    ManageUsersComponent,
-    MainPageComponent,
-    MainAdminPageComponent,
-    AdminDashboardComponent,
-    ConfirmRegisterComponent,
-    AccessDeinedComponent
-  ],
-  imports: [
-    BrowserModule,
-    AppRoutingModule,
-    HttpClientModule,
-    FormsModule,
-    ChartsModule,
-    DatepickerModule
-  ],
-  providers: [
-    {
-      provide: HTTP_INTERCEPTORS,
-      useClass: HttpInterceptorService,
-      multi: true
-    },
-    HttpClient,
-    DatePipe
-  ],
-  bootstrap: [AppComponent]
-})
+@NgModule({ declarations: [
+        AppComponent,
+        LoginComponent,
+        RegisterComponent,
+        MenuComponent,
+        UserDashboardComponent,
+        LightInfoComponent,
+        MyTransactionsComponent,
+        MyContactListComponent,
+        NewTransactionComponent,
+        NewContactComponent,
+        ProfileComponent,
+        ManageUsersComponent,
+        MainPageComponent,
+        MainAdminPageComponent,
+        AdminDashboardComponent,
+        ConfirmRegisterComponent,
+        AccessDeinedComponent
+    ],
+    bootstrap: [AppComponent], imports: [BrowserModule,
+        AppRoutingModule,
+        FormsModule,
+        ChartsModule,
+        DatepickerModule], providers: [
+        {
+            provide: HTTP_INTERCEPTORS,
+            useClass: HttpInterceptorService,
+            multi: true
+        },
+        HttpClient,
+        DatePipe,
+        provideHttpClient(withInterceptorsFromDi())
+    ] })
 export class AppModule {
 }

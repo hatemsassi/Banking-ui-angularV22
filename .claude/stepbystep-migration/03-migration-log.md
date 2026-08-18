@@ -160,3 +160,30 @@ Status: **complete.**
 - Committed as a single commit for this hop.
 
 Status: **complete.**
+
+## Hop 17 → 18
+
+- Commands run:
+  - `npm install --legacy-peer-deps --save-dev @angular/cli@18 @angular-devkit/build-angular@18 @angular/compiler-cli@18`
+  - `npm install --legacy-peer-deps @angular/core@18 @angular/common@18 @angular/compiler@18 @angular/forms@18 @angular/platform-browser@18 @angular/platform-browser-dynamic@18 @angular/router@18 @angular/animations@18`
+  - `./node_modules/.bin/ng update @angular/core --migrate-only --from=17 --to=18 --allow-dirty`
+- Migration schematics run:
+  - **`HttpClientModule` → `provideHttpClient()` migration — made a real
+    change, earlier than the upgrade plan anticipated (plan had this
+    pencilled in for hop 18→19; Angular's schematic actually ships it at
+    18).** `app.module.ts`: removed `HttpClientModule` from `imports`,
+    added `provideHttpClient(withInterceptorsFromDi())` to `providers` (kept
+    `withInterceptorsFromDi()` since the app uses a class-based
+    `HTTP_INTERCEPTORS` provider (`HttpInterceptorService`), not the newer
+    functional interceptor style — converting that is optional cleanup, not
+    required for this to work). The schematic also reformatted the
+    `@NgModule` decorator's property order/line-wrapping cosmetically; left
+    as-is since it's not wrong, just differently formatted.
+  - Two-way binding longform, `afterRender` phase API, and
+    `BootstrapContext`-for-SSR migrations: no changes made (not applicable
+    to this codebase).
+- Build: **PASSES.** Tests: **14 failed / 10 passed**, exact baseline, no
+  regressions.
+- Committed as a single commit for this hop.
+
+Status: **complete.**
