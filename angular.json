@@ -43,7 +43,10 @@
               "node_modules/bootstrap/dist/js/bootstrap.min.js",
               "node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"
             ],
-            "browser": "src/main.ts"
+            "browser": "src/main.ts",
+            "allowedCommonJsDependencies": [
+              "chart.js"
+            ]
           },
           "configurations": {
             "production": {
@@ -80,10 +83,10 @@
           "builder": "@angular/build:dev-server",
           "configurations": {
             "production": {
-              "browserTarget": "banking-ui-angular:build:production"
+              "buildTarget": "banking-ui-angular:build:production"
             },
             "development": {
-              "browserTarget": "banking-ui-angular:build:development"
+              "buildTarget": "banking-ui-angular:build:development"
             }
           },
           "defaultConfiguration": "development"
@@ -91,7 +94,7 @@
         "extract-i18n": {
           "builder": "@angular/build:extract-i18n",
           "options": {
-            "browserTarget": "banking-ui-angular:build"
+            "buildTarget": "banking-ui-angular:build"
           }
         },
         "test": {
@@ -117,5 +120,7 @@
       }
     }
   },
-  "defaultProject": "banking-ui-angular"
+  "cli": {
+    "analytics": false
+  }
 }

@@ -23,8 +23,6 @@ import { HttpInterceptorService } from './services/http-interceptor/http-interce
 import { FormsModule } from '@angular/forms';
 import { ConfirmRegisterComponent } from './pages/confirm-register/confirm-register.component';
 import { AccessDeinedComponent } from './pages/access-deined/access-deined.component';
-import { ChartsModule } from 'ng2-charts';
-import { DatepickerModule } from 'ng2-datepicker';
 import { DatePipe } from '@angular/common';
 
 @NgModule({ declarations: [
@@ -48,9 +46,7 @@ import { DatePipe } from '@angular/common';
     ],
     bootstrap: [AppComponent], imports: [BrowserModule,
         AppRoutingModule,
-        FormsModule,
-        ChartsModule,
-        DatepickerModule], providers: [
+        FormsModule], providers: [
         {
             provide: HTTP_INTERCEPTORS,
             useClass: HttpInterceptorService,

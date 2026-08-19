@@ -1,12 +1,12 @@
-import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, OnInit, ChangeDetectionStrategy, ViewChild } from '@angular/core';
 import { LightInfoInput } from '../../components/light-info/light-info.component';
 import { StatisticsService } from '../../services/services/statistics.service';
 import { HelperService } from '../../services/helper/helper.service';
 import { lastValueFrom } from 'rxjs';
-import { ChartDataSets, ChartType } from 'chart.js';
-import { Label } from 'ng2-charts';
-import { DatepickerOptions } from 'ng2-datepicker';
+import { Chart, registerables } from 'chart.js';
 import { DatePipe } from '@angular/common';
+
+Chart.register(...registerables);
 
 @Component({
     selector: 'app-user-dashboard',
@@ -15,29 +15,17 @@ import { DatePipe } from '@angular/common';
     changeDetection: ChangeDetectionStrategy.Eager,
     standalone: false
 })
-export class UserDashboardComponent implements OnInit {
+export class UserDashboardComponent implements OnInit, AfterViewInit {
+
+  @ViewChild('chartCanvas') chartCanvas!: ElementRef<HTMLCanvasElement>;
 
   accountInfoList: Array<LightInfoInput> = [];
   private accountBalance = 0;
   private highestTransfer = 0;
   private highestDeposit = 0;
-  chartType: ChartType = 'line';
-  dataset: ChartDataSets[] = [];
-  labels: Label[] = [];
-  chartOptions: any = {
-    legend: {
-      position: 'bottom',
-      labels: {
-        fontSize: 16,
-        usePointStyle: true
-      }
-    }
-  };
-  dateOptions: DatepickerOptions = {
-    format: 'yyyy-MM-dd'
-  };
-  startDate: Date = new Date();
-  endDate: Date = new Date();
+  private chart: Chart<'line'> | undefined;
+  startDate: string = new Date().toISOString().substring(0, 10);
+  endDate: string = new Date().toISOString().substring(0, 10);
 
 
   constructor(
@@ -51,6 +39,33 @@ export class UserDashboardComponent implements OnInit {
     this.initializeAccountInfo();
   }
 
+  ngAfterViewInit(): void {
+    this.chart = new Chart(this.chartCanvas.nativeElement, {
+      type: 'line',
+      data: {
+        labels: [],
+        datasets: [{
+          label: 'Sum transactions by day',
+          data: []
+        }]
+      },
+      options: {
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels: {
+              usePointStyle: true
+            }
+          },
+          title: {
+            display: true,
+            text: 'My awesome chart'
+          }
+        }
+      }
+    });
+  }
+
   filterStatistics() {
     this.statisticsService.findSumTractionsByDate({
       'user-id': this.helperService.userId,
@@ -58,18 +73,17 @@ export class UserDashboardComponent implements OnInit {
       'end-date': this.datePipe.transform(this.endDate, 'yyyy-MM-dd') as string
     }).subscribe({
       next: (values) => {
-        console.log(values);
-        this.dataset = [];
-        this.labels  = [];
-        const chartDataSet: ChartDataSets = {};
+        const labels: Array<string> = [];
         const dataValues: Array<number> = [];
         for(let record of values) {
-          this.labels.push(record.transactionDate as string);
+          labels.push(record.transactionDate as string);
           dataValues.push(record.amount as number);
         }
-        chartDataSet.data = dataValues;
-        chartDataSet.label = 'Sum transactions by day';
-        this.dataset.push(chartDataSet);
+        if (this.chart) {
+          this.chart.data.labels = labels;
+          this.chart.data.datasets[0].data = dataValues;
+          this.chart.update();
+        }
       }
     });
   }
