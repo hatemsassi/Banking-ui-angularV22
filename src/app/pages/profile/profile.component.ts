@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { UserService } from '../../services/services/user.service';
 import { HelperService } from '../../services/helper/helper.service';
 import { UserDto } from '../../services/models/user-dto';
@@ -7,9 +7,11 @@ import { AddressDto } from '../../services/models/address-dto';
 import { AddressService } from '../../services/services/address.service';
 
 @Component({
-  selector: 'app-profile',
-  templateUrl: './profile.component.html',
-  styleUrls: ['./profile.component.scss']
+    selector: 'app-profile',
+    templateUrl: './profile.component.html',
+    styleUrls: ['./profile.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
+    standalone: false
 })
 export class ProfileComponent implements OnInit {
 

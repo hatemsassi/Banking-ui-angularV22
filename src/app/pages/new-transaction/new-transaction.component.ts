@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { StatisticsService } from '../../services/services/statistics.service';
 import { ContactService } from '../../services/services/contact.service';
 import { TransactionsService } from '../../services/services/transactions.service';
@@ -8,9 +8,11 @@ import { TransactionDto } from '../../services/models/transaction-dto';
 import { ContactDto } from '../../services/models/contact-dto';
 
 @Component({
-  selector: 'app-new-transaction',
-  templateUrl: './new-transaction.component.html',
-  styleUrls: ['./new-transaction.component.scss']
+    selector: 'app-new-transaction',
+    templateUrl: './new-transaction.component.html',
+    styleUrls: ['./new-transaction.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
+    standalone: false
 })
 export class NewTransactionComponent implements OnInit {
 

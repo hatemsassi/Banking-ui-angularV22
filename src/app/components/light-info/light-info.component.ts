@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, ChangeDetectionStrategy } from '@angular/core';
 
 export interface LightInfoInput {
   title?: string;
@@ -7,9 +7,11 @@ export interface LightInfoInput {
 }
 
 @Component({
-  selector: 'app-light-info',
-  templateUrl: './light-info.component.html',
-  styleUrls: ['./light-info.component.scss']
+    selector: 'app-light-info',
+    templateUrl: './light-info.component.html',
+    styleUrls: ['./light-info.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
+    standalone: false
 })
 export class LightInfoComponent implements OnInit {
 
